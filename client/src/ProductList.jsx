@@ -2,39 +2,41 @@ import React from "react";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { useEffect } from "react";
 
 const ProductList = () => {
   const [newProduct, setNewProduct] = useState([
     { title: "", price: "", quantity: "" },
   ]);
   const [value, setValue] = useState("");
-  const [datalist, setDataList] = useState("");
+  const [datalist, setDataList] = useState([]);
 
   function getProducts() {
     return axios("https://fakestoreapi.com/products");
   }
-  const { isLoading, isError, data, error, refetch } = useQuery(
+
+  const { isLoading, isSuccess, isError, data, error, refetch } = useQuery(
     ["joke"],
     getProducts
   );
-  const deleteItem = () => {};
 
-  // const queryClient = useQueryClient()
-  // const [productList,setProductList]= useState('')
+  console.log(datalist);
 
-  // const fetchUsers =async()=>{
-  //     const res= await axios.get("https://fakestoreapi.com/products")
-  //     .then(response=>{
-  //         console.log(response.data)
-  //         setProductList(response.data)
-  //       })
-  //       const { data, status } = useQuery("products", fetchUsers);
+  //select func
+  const handleWheelScroll = (event) => {
+    if (event.deltaY > 0) {
+      setValue(value - 1);
+    } else {
+      setValue(value + 1);
+    }
+  };
 
   console.log(data, error);
-
-  const onChangeHandler = (e) => {
-    setValue(e.target.value);
-  };
+  useEffect(() => {
+    const price = data?.data.map((price, i) => price.price);
+    console.log(price);
+    setDataList(price);
+  }, [isSuccess]);
 
   return (
     <>
@@ -62,26 +64,24 @@ const ProductList = () => {
                             <option key={product.id} option value="true">
                               {product.title}
                             </option>
-                            <h2>{product.description}</h2>
+
                             {/* {product.price} */}
                           </>
                         ))}
                       </select>
                     </td>
-                    <td>{item.price}</td>
+                    <td>{datalist}</td>
                     <td>
                       <input
+                        onWheel={handleWheelScroll}
                         type="number"
-                        id="number"
-                        name="number"
-                        onChange={onChangeHandler}
-                        value={value}
+                        onChange={(e) => setValue(e.target.value)}
                       />
                     </td>
                     <td>{}</td>
 
                     <td>
-                      <button onClick={() => calculate}>Calculate</button>
+                      <button>Calculate</button>
                     </td>
                   </tr>
                 </>
@@ -89,6 +89,7 @@ const ProductList = () => {
             })}
           </tbody>
         </table>
+        <div>{value}</div>
       </div>
     </>
   );
