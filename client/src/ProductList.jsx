@@ -2,14 +2,14 @@ import React from "react";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { useEffect } from "react";
+import { AddIcon, CloseIcon } from "@chakra-ui/icons";
 
 const ProductList = () => {
   const [newProduct, setNewProduct] = useState([
-    { title: "", price: "", quantity: "" },
+    { id: "", title: "", price: "", quantity: "" },
   ]);
+  let obj = { id: "", title: "", price: "", quantity: "" };
   const [value, setValue] = useState("");
-  const [datalist, setDataList] = useState([]);
 
   function getProducts() {
     return axios("https://fakestoreapi.com/products");
@@ -20,24 +20,27 @@ const ProductList = () => {
     getProducts
   );
 
-  console.log(datalist);
+  const showItems = () => {
+    let newArr = [...newProduct, obj];
+    setNewProduct(newArr);
+  };
+  console.log(newProduct);
 
-  //select func
-  const handleWheelScroll = (event) => {
-    if (event.deltaY > 0) {
-      setValue(value - 1);
-    } else {
-      setValue(value + 1);
-    }
+  const deleteProduct = (id) => {
+    const newList = newProduct.filter((_, index) => index !== id);
+    setNewProduct([...newList]);
   };
 
   console.log(data, error);
-  useEffect(() => {
-    const price = data?.data.map((price, i) => price.price);
-    console.log(price);
-    setDataList(price);
-  }, [isSuccess]);
 
+  const handleOnChange = (e, index) => {
+    let price = data[index].price;
+    let newArr = newProduct;
+    newArr[index][e.target.name] = e.target.value;
+    setNewProduct([...newArr], price);
+    console.log(e, index);
+  };
+  console.log(newProduct.price);
   return (
     <>
       <div className="container">
@@ -53,15 +56,22 @@ const ProductList = () => {
             </tr>
           </thead>
           <tbody>
-            {newProduct?.map((item, id) => {
+            {newProduct?.map((item, index) => {
               return (
                 <>
-                  <tr key={item.id}>
+                  <tr key={item.index}>
                     <td>
-                      <select name="products">
+                      <select
+                        name="title"
+                        onChange={(e) => handleOnChange(e, index)}
+                      >
                         {data?.data?.map((product) => (
                           <>
-                            <option key={product.id} option value="true">
+                            <option
+                              key={product.id}
+                              option
+                              value={product.title}
+                            >
                               {product.title}
                             </option>
 
@@ -70,18 +80,28 @@ const ProductList = () => {
                         ))}
                       </select>
                     </td>
-                    <td>{datalist}</td>
-                    <td>
-                      <input
-                        onWheel={handleWheelScroll}
-                        type="number"
-                        onChange={(e) => setValue(e.target.value)}
-                      />
-                    </td>
-                    <td>{}</td>
+                    <td>{newProduct.price}</td>
 
                     <td>
-                      <button>Calculate</button>
+                      <input
+                        type="number"
+                        name="quantity"
+                        value={item.quantity}
+                        onChange={(e) => handleOnChange(e, index)}
+                      />
+                    </td>
+
+                    <td>{item.price * item.quantity}</td>
+
+                    <td>
+                      {index != 0 && (
+                        <button
+                          class="btn btn-primary"
+                          onClick={() => deleteProduct(index)}
+                        >
+                          <CloseIcon boxSize={10} />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 </>
@@ -89,6 +109,11 @@ const ProductList = () => {
             })}
           </tbody>
         </table>
+        <div>
+          <button class="btn btn-primary" onClick={showItems}>
+            <AddIcon boxSize={10} />
+          </button>
+        </div>
         <div>{value}</div>
       </div>
     </>

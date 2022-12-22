@@ -1,25 +1,21 @@
-
-import React from "react"
-import 'bootstrap/dist/css/bootstrap.css';
+import React from "react";
+import "bootstrap/dist/css/bootstrap.css";
 // import './App.css';
 // import {BrowserRouter, Route, Routes} from 'react-router-dom'
 // import Home from './pages/Home';
 // import Contact from './pages/Contact';
 // import Navbar from './components/Navbar';
-import ProductList from "./ProductList"
+import ProductList from "./ProductList";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-
-const queryClient = new QueryClient()
+const queryClient = new QueryClient();
 function App() {
-  
   return (
-	 // Provide the client to your App
-	 <QueryClientProvider client={queryClient}>
-	 <ProductList />
-   </QueryClientProvider>
- 
-	
+    // Provide the client to your App
+    <QueryClientProvider client={queryClient}>
+      <ProductList />
+    </QueryClientProvider>
+
     //  <BrowserRouter>
     //  <Navbar />
     //   <Routes>
