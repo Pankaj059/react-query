@@ -6,41 +6,76 @@ import { AddIcon, CloseIcon } from "@chakra-ui/icons";
 
 const ProductList = () => {
   const [newProduct, setNewProduct] = useState([
-    { id: "", title: "", price: "", quantity: "" },
+    { id: 0, title: "", price: "", quantity: 0 },
   ]);
-  let obj = { id: "", title: "", price: "", quantity: "" };
   const [value, setValue] = useState("");
 
   function getProducts() {
     return axios("https://fakestoreapi.com/products");
   }
-
   const { isLoading, isSuccess, isError, data, error, refetch } = useQuery(
     ["joke"],
     getProducts
   );
 
+  const items = data?.data || [];
+
+  //for mutate button
   const showItems = () => {
-    let newArr = [...newProduct, obj];
+    let newArr = [
+      ...newProduct,
+      { id: newProduct.length, title: "", price: "", quantity: 0 },
+    ];
     setNewProduct(newArr);
   };
   console.log(newProduct);
 
+  //setting quantity
+  const handleQuantityChange = (id, value) => {
+    setNewProduct((prev) =>
+      prev.map((each) => {
+        if (each.id === id) {
+          return {
+            ...each,
+            quantity: +value,
+          };
+        }
+        return each;
+      })
+    );
+  };
+
+  //deleting product through id
   const deleteProduct = (id) => {
-    const newList = newProduct.filter((_, index) => index !== id);
-    setNewProduct([...newList]);
+    const newList = newProduct.filter((_, item) => item !== id);
+    setNewProduct(newList);
+    console.log(newList);
   };
 
   console.log(data, error);
 
-  const handleOnChange = (e, index) => {
-    let price = data[index].price;
-    let newArr = newProduct;
-    newArr[index][e.target.name] = e.target.value;
-    setNewProduct([...newArr], price);
-    console.log(e, index);
+  //showing price value comparing product id and id
+  const handleOnChange = (id, itemId, field) => {
+    const item = items.find((item) => item.id === id);
+    console.log({ item });
+    // debugger;
+
+    setNewProduct((prev) =>
+      prev.map((i) => {
+        console.log("sdsadadasd", i);
+        if (i.id == itemId) {
+          return {
+            ...i,
+            [field]: item[field],
+          };
+        }
+        console.log(i.id, item.id);
+        return i;
+      })
+    );
   };
-  console.log(newProduct.price);
+
+  if (!items || !items.length) return null;
   return (
     <>
       <div className="container">
@@ -56,48 +91,47 @@ const ProductList = () => {
             </tr>
           </thead>
           <tbody>
-            {newProduct?.map((item, index) => {
+            {newProduct?.map((item) => {
               return (
                 <>
-                  <tr key={item.index}>
+                  <tr key={item.id}>
                     <td>
                       <select
                         name="title"
-                        onChange={(e) => handleOnChange(e, index)}
+                        onChange={(e) =>
+                          handleOnChange(+e.target.value, item.id, "price")
+                        }
                       >
-                        {data?.data?.map((product) => (
+                        {items.map((product) => (
                           <>
-                            <option
-                              key={product.id}
-                              option
-                              value={product.title}
-                            >
+                            <option key={product.id} option value={product.id}>
                               {product.title}
                             </option>
-
-                            {/* {product.price} */}
                           </>
                         ))}
                       </select>
                     </td>
-                    <td>{newProduct.price}</td>
+                    <td>{item.price}</td>
 
                     <td>
                       <input
                         type="number"
                         name="quantity"
                         value={item.quantity}
-                        onChange={(e) => handleOnChange(e, index)}
+                        onChange={(e) => {
+                          console.log("aaaaa", e.target.value);
+                          handleQuantityChange(item.id, e.target.value);
+                        }}
                       />
                     </td>
 
                     <td>{item.price * item.quantity}</td>
 
                     <td>
-                      {index != 0 && (
+                      {item.id != 0 && (
                         <button
-                          class="btn btn-primary"
-                          onClick={() => deleteProduct(index)}
+                          className="btn btn-primary"
+                          onClick={() => deleteProduct(item.id)}
                         >
                           <CloseIcon boxSize={10} />
                         </button>
@@ -114,7 +148,6 @@ const ProductList = () => {
             <AddIcon boxSize={10} />
           </button>
         </div>
-        <div>{value}</div>
       </div>
     </>
   );
