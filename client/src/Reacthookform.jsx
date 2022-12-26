@@ -2,47 +2,49 @@ import React from "react";
 import { useForm } from "react-hook-form";
 
 export default function Reacthookform() {
-  const { register, handleSubmit, errors } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
+  const handleError = (errors) => {
+    console.log(errors);
+  };
   const onSubmit = (data) => {
     console.log(data);
+  };
+  const registerOptions = {
+    email: { required: "Email is required" },
+    password: {
+      required: "Password is required",
+      minLength: {
+        value: 8,
+        message: "Password must have at least 8 characters",
+      },
+    },
   };
 
   return (
     <div>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit, handleError)}>
         <div className="form-control ">
           <label>Email</label>
           <input
-            type="text"
+            type="email"
             name="email"
-            ref={register({
-              required: true,
-              pattern: /^[^@ ]+@[^@ ]+\.[^@ .]{2,}$/,
-            })}
+            {...register("email", registerOptions.email)}
           />
-          {errors.email && errors.email.type === "required" && (
-            <p className="errorMsg">Email is required.</p>
-          )}
-          {errors.email && errors.email.type === "pattern" && (
-            <p className="errorMsg">Email is not valid.</p>
-          )}
+          <div>{errors?.email && errors.email.message}</div>
         </div>
         <div className="form-control">
           <label>Password</label>
           <input
             type="password"
             name="password"
-            ref={register({ required: true, minLength: 6 })}
+            {...register("password", registerOptions.password)}
           />
-          {errors.password && errors.password.type === "required" && (
-            <p className="errorMsg">Password is required.</p>
-          )}
-          {errors.password && errors.password.type === "minLength" && (
-            <p className="errorMsg">
-              Password should be at-least 6 characters.
-            </p>
-          )}
+          <div>{errors?.password && errors.password.message}</div>
         </div>
         <div className="form-control">
           <label></label>
